@@ -1,0 +1,290 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# cep - Context Engineering Package CLI
+# v0.1.0
+
+CEP_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+CEP_VERSION="$(cat "$CEP_DIR/VERSION")"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+usage() {
+    echo "cep - Context Engineering Package v${CEP_VERSION}"
+    echo ""
+    echo "Usage:"
+    echo "  cep init <project-path> <project-name>    Scaffold a new CEP-managed project"
+    echo "  cep status [project-path]                  Show CEP version status"
+    echo "  cep upgrade <project-path>                 Upgrade project to latest CEP"
+    echo "  cep list                                   List all CEP-managed projects"
+    echo "  cep diff <project-path>                    Show what would change on upgrade"
+    echo ""
+}
+
+# --- INIT ---
+cmd_init() {
+    local project_path="${1:?Usage: cep init <project-path> <project-name>}"
+    local project_name="${2:?Usage: cep init <project-path> <project-name>}"
+    project_path="$(realpath "$project_path")"
+
+    if [[ -d "$project_path/.cep" ]]; then
+        echo -e "${YELLOW}Warning: $project_path is already CEP-managed (v$(cat "$project_path/.cep/version"))${NC}"
+        read -rp "Re-initialize? This will overwrite CEP files but preserve project-specific content. [y/N] " confirm
+        [[ "$confirm" =~ ^[Yy]$ ]] || exit 0
+    fi
+
+    echo -e "${BLUE}Initializing CEP v${CEP_VERSION} in ${project_path}...${NC}"
+
+    # Create .cep directory structure
+    mkdir -p "$project_path/.cep/logs"
+    mkdir -p "$project_path/.cep/decisions"
+
+    # Write version marker
+    echo "$CEP_VERSION" > "$project_path/.cep/version"
+
+    # Record project in CEP registry
+    mkdir -p "$CEP_DIR/.registry"
+    echo "$project_path" >> "$CEP_DIR/.registry/projects"
+    # Deduplicate
+    sort -u "$CEP_DIR/.registry/projects" -o "$CEP_DIR/.registry/projects"
+
+    # Create project-specific local file if it doesn't exist
+    if [[ ! -f "$project_path/.cep/CLAUDE.local.md" ]]; then
+        cat > "$project_path/.cep/CLAUDE.local.md" << EOF
+# Project-Specific Context for ${project_name}
+
+## What This Project Is
+[Describe the project purpose and goals here]
+
+## Tech Stack
+[List languages, frameworks, key dependencies]
+
+## Project-Specific Conventions
+[Any conventions that override or extend the base CEP template]
+EOF
+    fi
+
+    # Initialize Mikado tree
+    if [[ ! -f "$project_path/.cep/mikado.yaml" ]]; then
+        cat > "$project_path/.cep/mikado.yaml" << EOF
+project: "${project_name}"
+updated: "$(date +%Y-%m-%d)"
+active_path: "goal"
+
+goal:
+  title: "Define the first major goal"
+  status: active
+  mhc: 11
+  children:
+    - title: "Define this task"
+      status: active
+      mhc: 9
+EOF
+    fi
+
+    # Assemble CLAUDE.md
+    assemble_claude_md "$project_path" "$project_name"
+
+    echo -e "${GREEN}✓ CEP v${CEP_VERSION} initialized in ${project_path}${NC}"
+    echo ""
+    echo "  Next steps:"
+    echo "  1. Edit .cep/CLAUDE.local.md with project-specific context"
+    echo "  2. Edit .cep/mikado.yaml with your first goal"
+    echo "  3. Start Claude Code in ${project_path}"
+}
+
+# --- ASSEMBLE CLAUDE.MD ---
+assemble_claude_md() {
+    local project_path="$1"
+    local project_name="$2"
+    local today
+    today="$(date +%Y-%m-%d)"
+
+    local notification_block="Notifications are not yet configured. See CEP docs for Gotify setup."
+
+    # Read project-specific content
+    local project_specific=""
+    if [[ -f "$project_path/.cep/CLAUDE.local.md" ]]; then
+        project_specific="$(cat "$project_path/.cep/CLAUDE.local.md")"
+    fi
+
+    # Read base template and perform substitutions
+    sed \
+        -e "s|{{CEP_VERSION}}|${CEP_VERSION}|g" \
+        -e "s|{{PROJECT_NAME}}|${project_name}|g" \
+        -e "s|{{UPGRADE_DATE}}|${today}|g" \
+        -e "s|{{NOTIFICATION_BLOCK}}|${notification_block}|g" \
+        "$CEP_DIR/templates/CLAUDE.md.base" > "$project_path/.cep/CLAUDE.md.assembled"
+
+    # Replace the project-specific placeholder with actual content
+    # Using awk because sed struggles with multiline replacement
+    awk -v content="$project_specific" '
+        /{{PROJECT_SPECIFIC}}/ { print content; next }
+        { print }
+    ' "$project_path/.cep/CLAUDE.md.assembled" > "$project_path/CLAUDE.md"
+
+    rm -f "$project_path/.cep/CLAUDE.md.assembled"
+}
+
+# --- STATUS ---
+cmd_status() {
+    local project_path="${1:-$(pwd)}"
+    project_path="$(realpath "$project_path")"
+
+    if [[ ! -d "$project_path/.cep" ]]; then
+        echo -e "${RED}Not a CEP-managed project: ${project_path}${NC}"
+        exit 1
+    fi
+
+    local project_version
+    project_version="$(cat "$project_path/.cep/version")"
+
+    echo -e "Project:      ${BLUE}${project_path}${NC}"
+    echo -e "CEP version:  ${project_version}"
+    echo -e "Latest CEP:   ${CEP_VERSION}"
+
+    if [[ "$project_version" == "$CEP_VERSION" ]]; then
+        echo -e "Status:       ${GREEN}Up to date${NC}"
+    else
+        echo -e "Status:       ${YELLOW}Upgrade available${NC}"
+    fi
+
+    # Show recent session logs
+    if [[ -d "$project_path/.cep/logs" ]]; then
+        local log_count
+        log_count="$(find "$project_path/.cep/logs" -name "*.md" | wc -l)"
+        echo -e "Session logs: ${log_count}"
+
+        local latest_log
+        latest_log="$(ls -1 "$project_path/.cep/logs/"*.md 2>/dev/null | sort | tail -1)"
+        if [[ -n "$latest_log" ]]; then
+            echo -e "Last session: $(basename "$latest_log" .md)"
+        fi
+    fi
+
+    # Show Mikado progress
+    if [[ -f "$project_path/.cep/mikado.yaml" ]]; then
+        local total done
+        total="$(grep -c 'status:' "$project_path/.cep/mikado.yaml" || true)"
+        done="$(grep -c 'status: done' "$project_path/.cep/mikado.yaml" || true)"
+        echo -e "Mikado tasks: ${done}/${total} nodes"
+    fi
+}
+
+# --- LIST ---
+cmd_list() {
+    local registry="$CEP_DIR/.registry/projects"
+
+    if [[ ! -f "$registry" ]]; then
+        echo "No CEP-managed projects found."
+        exit 0
+    fi
+
+    echo -e "${BLUE}CEP-managed projects:${NC}"
+    echo ""
+
+    while IFS= read -r project_path; do
+        if [[ -d "$project_path/.cep" ]]; then
+            local version
+            version="$(cat "$project_path/.cep/version")"
+            local status_color="$GREEN"
+            [[ "$version" != "$CEP_VERSION" ]] && status_color="$YELLOW"
+            echo -e "  ${status_color}v${version}${NC}  ${project_path}"
+        else
+            echo -e "  ${RED}gone${NC}  ${project_path}"
+        fi
+    done < "$registry"
+}
+
+# --- UPGRADE ---
+cmd_upgrade() {
+    local project_path="${1:?Usage: cep upgrade <project-path>}"
+    project_path="$(realpath "$project_path")"
+
+    if [[ ! -d "$project_path/.cep" ]]; then
+        echo -e "${RED}Not a CEP-managed project: ${project_path}${NC}"
+        exit 1
+    fi
+
+    local project_version
+    project_version="$(cat "$project_path/.cep/version")"
+
+    if [[ "$project_version" == "$CEP_VERSION" ]]; then
+        echo -e "${GREEN}Already at latest version (v${CEP_VERSION})${NC}"
+        exit 0
+    fi
+
+    echo -e "${BLUE}Upgrading from v${project_version} to v${CEP_VERSION}...${NC}"
+
+    # Extract project name from existing CLAUDE.md
+    local project_name
+    project_name="$(head -3 "$project_path/CLAUDE.md" | grep 'Project:' | sed 's/.*Project: //')"
+    [[ -z "$project_name" ]] && project_name="Unknown"
+
+    # Reassemble CLAUDE.md (project-specific content preserved via .cep/CLAUDE.local.md)
+    assemble_claude_md "$project_path" "$project_name"
+
+    # Update version
+    echo "$CEP_VERSION" > "$project_path/.cep/version"
+
+    echo -e "${GREEN}✓ Upgraded to v${CEP_VERSION}${NC}"
+    echo "  Review the updated CLAUDE.md to see what changed."
+}
+
+# --- DIFF ---
+cmd_diff() {
+    local project_path="${1:?Usage: cep diff <project-path>}"
+    project_path="$(realpath "$project_path")"
+
+    if [[ ! -d "$project_path/.cep" ]]; then
+        echo -e "${RED}Not a CEP-managed project: ${project_path}${NC}"
+        exit 1
+    fi
+
+    # Generate what the new CLAUDE.md would look like
+    local project_name
+    project_name="$(head -3 "$project_path/CLAUDE.md" | grep 'Project:' | sed 's/.*Project: //')"
+    [[ -z "$project_name" ]] && project_name="Unknown"
+
+    local tmp
+    tmp="$(mktemp)"
+    local today
+    today="$(date +%Y-%m-%d)"
+    local notification_block="Notifications are not yet configured. See CEP docs for Gotify setup."
+    local project_specific=""
+    [[ -f "$project_path/.cep/CLAUDE.local.md" ]] && project_specific="$(cat "$project_path/.cep/CLAUDE.local.md")"
+
+    sed \
+        -e "s|{{CEP_VERSION}}|${CEP_VERSION}|g" \
+        -e "s|{{PROJECT_NAME}}|${project_name}|g" \
+        -e "s|{{UPGRADE_DATE}}|${today}|g" \
+        -e "s|{{NOTIFICATION_BLOCK}}|${notification_block}|g" \
+        "$CEP_DIR/templates/CLAUDE.md.base" | \
+    awk -v content="$project_specific" '
+        /{{PROJECT_SPECIFIC}}/ { print content; next }
+        { print }
+    ' > "$tmp"
+
+    diff --color=auto -u "$project_path/CLAUDE.md" "$tmp" || true
+    rm -f "$tmp"
+}
+
+# --- MAIN ---
+case "${1:-}" in
+    init)    shift; cmd_init "$@" ;;
+    status)  shift; cmd_status "$@" ;;
+    list)    cmd_list ;;
+    upgrade) shift; cmd_upgrade "$@" ;;
+    diff)    shift; cmd_diff "$@" ;;
+    -h|--help|"") usage ;;
+    *)
+        echo -e "${RED}Unknown command: $1${NC}"
+        usage
+        exit 1
+        ;;
+esac
