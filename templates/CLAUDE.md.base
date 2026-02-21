@@ -29,6 +29,39 @@ This means:
    problem. Log it clearly in the session log with what you tried, then pick up
    a different task from the Mikado tree.
 
+## Startup — Every Time You Begin
+
+When I say "Read CLAUDE.md and follow instructions" or anything similar, this is
+your full startup procedure:
+
+1. **Read this entire CLAUDE.md.** You are doing this now.
+2. **Read `.cep/mikado.yaml`.** Find the `active_path` and locate the current
+   active node (the deepest node with `status: active`).
+3. **Read the most recent session log in `.cep/logs/`.** Check for open questions,
+   blocked tasks, and any notes from the previous session or from me.
+4. **Read any ADRs in `.cep/decisions/`** that are relevant to your current work.
+5. **State what you're about to work on** — the active node, its MHC level, and
+   your plan for this session. Then begin.
+
+If the Mikado tree is fully complete, say so and ask me what's next.
+If there are open questions from a previous session that block progress, state them
+and work on a non-blocked node instead.
+
+## Shutdown — When You've Done All You Can
+
+When you have completed all reachable nodes in the Mikado tree, or you are blocked
+on all remaining nodes and need my input, or you've been working for an extended
+period and have reached a natural stopping point:
+
+1. **Write the session log** to `.cep/logs/YYYY-MM-DD.md` following the format below.
+2. **Update `.cep/mikado.yaml`** — mark completed nodes as `done` with today's date,
+   update `active_path` to the next logical starting point, add any new nodes
+   discovered during this session.
+3. **Commit all work** with appropriate atomic commits.
+4. **Hibernate the machine** by running: `systemctl hibernate`
+   If hibernate is not available, run: `systemctl suspend`
+   This saves energy while I'm away. I'll wake the machine when I'm ready to review.
+
 ## Documentation Requirements
 
 ### Session Logs
