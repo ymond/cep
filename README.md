@@ -149,6 +149,56 @@ The base template defines conventions that apply to every project:
 
 **Start simple, rewrite later.** The CLI is bash. It works. When the feature set stabilizes, rewrite it in Go with a proper TUI.
 
+## Starting a New Project
+
+CEP includes a kickoff guide that turns a stream-of-consciousness idea into a fully
+planned project with a `CLAUDE.local.md` and `mikado.yaml`.
+
+### How to Use It
+
+Open a new conversation in **Claude Desktop** (not Claude Code — the kickoff is a
+conversation, not a coding task). Then either:
+
+- Drag and drop `templates/PROJECT_KICKOFF.md` into the chat, or
+- If you have the Filesystem MCP connector enabled, just tell Claude:
+  "Read `~/projects/cep/templates/PROJECT_KICKOFF.md` and follow it"
+
+Then start talking about your idea. Claude will interview you, push back on scope
+creep, help you define a realistic v0.1, and decompose it into a Mikado tree. When
+you're both happy with the plan, it writes the files to `~/Claude/<project-name>/`.
+
+### After the Kickoff
+
+```bash
+mkdir -p ~/projects/<project-name>
+cep init ~/projects/<project-name> <project-name>
+cp ~/Claude/<project-name>/CLAUDE.local.md ~/projects/<project-name>/.cep/CLAUDE.local.md
+cp ~/Claude/<project-name>/mikado.yaml ~/projects/<project-name>/.cep/mikado.yaml
+cep init ~/projects/<project-name> <project-name>  # regenerate CLAUDE.md
+cd ~/projects/<project-name>
+claude --dangerously-skip-permissions
+```
+
+### Why Claude Desktop and Not Claude Code?
+
+The kickoff is an open-ended brainstorming conversation — exploring ideas, getting
+honest pushback, refining scope, making tradeoffs. Claude Desktop is designed for
+that kind of back-and-forth. Claude Code is an execution tool that wants a clear
+task and a codebase. Use Desktop to plan, Code to build.
+
+### Keeping the Kickoff Guide Current
+
+The `PROJECT_KICKOFF.md` template includes a list of your existing projects so Claude
+can spot overlaps and dependencies. Update this list each time you start a new project:
+
+```bash
+nano ~/projects/cep/templates/PROJECT_KICKOFF.md
+# Update the "My existing CEP-managed projects" list
+cd ~/projects/cep
+git add -A
+git commit -m "docs: add <project-name> to kickoff project list"
+```
+
 ## Roadmap
 
 - **v0.1.0** — Current. `init`, `status`, `list`, `upgrade`, `diff`.
