@@ -43,6 +43,8 @@ cmd_init() {
     # Create .cep directory structure
     mkdir -p "$project_path/.cep/logs"
     mkdir -p "$project_path/.cep/decisions"
+    mkdir -p "$project_path/.cep/blog"
+    mkdir -p "$project_path/.cep/guidebook"
 
     # Write version marker
     echo "$CEP_VERSION" > "$project_path/.cep/version"
@@ -220,6 +222,10 @@ cmd_upgrade() {
     fi
 
     echo -e "${BLUE}Upgrading from v${project_version} to v${CEP_VERSION}...${NC}"
+
+    # Create new directories that may not exist in older versions
+    mkdir -p "$project_path/.cep/blog"
+    mkdir -p "$project_path/.cep/guidebook"
 
     # Extract project name from existing CLAUDE.md
     local project_name
