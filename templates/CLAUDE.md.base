@@ -58,9 +58,20 @@ period and have reached a natural stopping point:
    update `active_path` to the next logical starting point, add any new nodes
    discovered during this session.
 3. **Commit all work** with appropriate atomic commits.
-4. **Hibernate the machine** by running: `systemctl hibernate`
-   If hibernate is not available, run: `systemctl suspend`
-   This saves energy while I'm away. I'll wake the machine when I'm ready to review.
+4. **Announce completion audibly.** Raymond may or may not be nearby. Play a sound
+   so he knows if he is:
+   ```bash
+   espeak "Claude has finished working. The computer will shut down in 3 minutes. To cancel, run: sudo shutdown minus c." 2>/dev/null \
+     || printf '\a'
+   ```
+5. **Schedule a timed shutdown.** Raymond is likely asleep or away. Do NOT prompt
+   and wait for a response — just schedule it:
+   ```bash
+   sudo shutdown +3 "CEP: Claude Code session complete. Cancel with: sudo shutdown -c"
+   ```
+
+**CRITICAL: Do not ask "should I shut down?" or "would you like to continue?" —
+Raymond is not there. Steps 1-5 are all autonomous. No prompting. No waiting.**
 
 ## Documentation Requirements
 
