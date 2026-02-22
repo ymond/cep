@@ -103,17 +103,18 @@ period and have reached a natural stopping point:
    and populate `commits` with commit hashes from this session.
 6. **Commit all work** with appropriate atomic commits.
 7. **Announce completion audibly.** Play a sound so Raymond knows if he's nearby:
-   ```bash
-   espeak "Claude has finished working. The computer will shut down in 3 minutes. To cancel, run: sudo shutdown minus c." 2>/dev/null \
+```bash
+   espeak "Claude has finished working. The computer will sleep in 3 minutes. To cancel, run: kill all sleep." 2>/dev/null \
      || printf '\a'
-   ```
-8. **Schedule a timed shutdown.** Do NOT ask if you should shut down — Raymond may
-   not be at the computer. Instead, schedule it with a cancellation window:
-   ```bash
-   sudo shutdown +3 "CEP: Claude Code session complete. Cancel with: sudo shutdown -c"
-   ```
+```
+8. **Put the computer to sleep.** Raymond is likely asleep or away. Do NOT prompt.
+   Wait 3 minutes (so Raymond can cancel if nearby), then sleep:
+```bash
+   sleep 180 && systemctl suspend &
+   echo "CEP: Computer will sleep in 3 minutes. To cancel: kill %1"
+```
 
-**CRITICAL: Do not ask "should I shut down?" or "would you like to continue?" —
+**CRITICAL: Do not ask "should I sleep the computer?" or "would you like to continue?" —
 Raymond is not there. Steps 1-8 are all autonomous. No prompting. No waiting.**
 
 ## Documentation Requirements
