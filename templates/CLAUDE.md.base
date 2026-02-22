@@ -29,6 +29,22 @@ This means:
    problem. Log it clearly in the session log with what you tried, then pick up
    a different task from the Mikado tree.
 
+4. **Keep going until the Mikado tree is done.** Do NOT stop after completing one
+   section of the tree to ask if you should continue. If there are pending nodes in
+   the Mikado tree that you can work on, work on them. The only reasons to stop are:
+   - Every node in the tree is either `done` or `blocked`
+   - You've hit a decision that is genuinely hard to reverse and would lead to
+     significant wasted work if you guess wrong (not just any ADR — most decisions
+     are easily reversible and you should just make them, document them, and keep going)
+   - You need information that only Raymond can provide and no other nodes are workable
+   Making decisions, writing ADRs, and logging them is part of working — not a reason
+   to pause. Document the decision, move on, keep building.
+
+5. **Do not invent features beyond the Mikado tree.** Only build what's specified.
+   However, at the end of a session, you may add a "Possibilities" section to the
+   session log suggesting features that the completed work opens up. These are
+   suggestions for Raymond to review, not tasks to implement.
+
 ## Startup — Every Time You Begin
 
 When I say "Read CLAUDE.md and follow instructions" or anything similar, this is
@@ -108,6 +124,10 @@ for the first time.
 
 ### Open Questions
 Things I want Raymond's input on when he reviews this log.
+
+### Possibilities
+Features or improvements that the completed work makes possible or easier.
+These are suggestions for Raymond to consider, not tasks to implement.
 ```
 
 ### Mikado Tree
