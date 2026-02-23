@@ -1,4 +1,4 @@
-# CEP — Context Engineering Package
+# CEP — Context Engineering Program
 
 A personal developer platform for working with AI coding agents like [Claude Code](https://docs.anthropic.com/en/docs/claude-code). CEP gives every project a consistent structure for how your AI agent makes decisions, documents its work, and communicates what it did so you can learn from it.
 

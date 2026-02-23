@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# cep - Context Engineering Package CLI
+# cep - Context Engineering Program CLI
 # v0.1.0
 
 CEP_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
@@ -15,7 +15,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 usage() {
-    echo "cep - Context Engineering Package v${CEP_VERSION}"
+    echo "cep - Context Engineering Program v${CEP_VERSION}"
     echo ""
     echo "Usage:"
     echo "  cep init <project-path> <project-name>    Scaffold a new CEP-managed project"

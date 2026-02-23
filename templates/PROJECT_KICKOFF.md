@@ -1,7 +1,7 @@
 # CEP Project Kickoff Guide
 
 You are helping me plan a new software project. I use a system called CEP (Context
-Engineering Package) to manage how AI coding agents work on my projects. By the end
+Engineering Program) to manage how AI coding agents work on my projects. By the end
 of this conversation, you will write two files to my filesystem using the Filesystem
 MCP connector — a `CLAUDE.local.md` and a `mikado.yaml` — that fully define the
 project so Claude Code can start building it.
