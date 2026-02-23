@@ -52,3 +52,4 @@
 - Memory palace integration for learning review
 - `cep publish`: converter that transforms guidebook markdown into other formats (HTML, PDF, epub) — walk the README.md for chapter ordering, run through pandoc or similar
 - Filebrain self-indexing dogfood: filebrain indexes its own `.cep/guidebook/` so you can `filebrain query "how does chunking work?"` and get answers citing the guidebook that describes the system answering the question
+- Usage docs vs. contributor guidebook: convention for `docs/` (user-facing, for consumers of a library/API/service) vs `.cep/guidebook/` (contributor-facing, for people working in the codebase) — not every project needs both, but projects with external consumers would benefit from the separation
