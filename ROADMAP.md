@@ -15,6 +15,21 @@ CLAUDE.md template, Mikado trees, session logs, ADRs, PROJECT_KICKOFF.md).
 These are themed groups of ideas that have emerged from real usage. Version numbers,
 ordering, and scope will be decided in a dedicated roadmap planning session.
 
+### `cep work` — Launch Command
+- `cep work` as a wrapper around `claude --dangerously-skip-permissions`
+- Preamble warning that permissions are being skipped, with options: "yes", "no", "yes, and don't ask again"
+- "Don't ask again" preference stored per-project or globally (TBD)
+- Pre-flight checks before launch: verify CLAUDE.md exists, show active Mikado node so you know what the agent is about to work on
+- Potential future: `cep work --resume` to pass a session UUID for continuation
+
+### Session Timeline and Heartbeat
+- Heartbeat mechanism: agent writes a `heartbeat` timestamp to `sessions.yaml` every N seconds during a session
+- If Claude crashes, the heartbeat stops — last heartbeat gives accurate "worked until" time rather than relying on a graceful `ended` timestamp
+- Multi-range session tracking: a session can have multiple active time ranges (e.g., initial run + resurrection), each with start/end/heartbeat data
+- Reason field per range: "crashed" (heartbeat stopped, no graceful shutdown), "completed" (normal shutdown), "continued" (resurrected to finish specific tasks)
+- `cep status` could show total active time per session, time since last heartbeat, and whether the session ended cleanly
+- Note: this level of structured data may push sessions.yaml toward SQLite or a more schema-friendly format — evaluate when building
+
 ### Git Workflow
 - Branch-per-experiment strategy (agent creates branches for different approaches)
 - PR-style documentation for posterity
