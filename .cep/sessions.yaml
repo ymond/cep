@@ -1,0 +1,9 @@
+- id: "20260223-0008"
+  claude_session: null
+  status: active
+  started: "2026-02-23T00:08:00"
+  ended: null
+  log: "logs/20260223-0008.md"
+  blog: "blog/20260223-0008-first-bootstrap.md"
+  decisions: []
+  commits: []

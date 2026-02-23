@@ -128,11 +128,19 @@ cd ~/projects/cep
 
 The CLI is a single bash script at `bin/cep`. The template is at `templates/CLAUDE.md.base`. The project kickoff guide is at `templates/PROJECT_KICKOFF.md`. There's no build system, no dependencies beyond bash and coreutils.
 
+### Run the tests
+
+```bash
+bash tests/run_all.sh
+```
+
+30 tests across four suites (init, upgrade, diff, status/list). No dependencies — the test harness is plain bash.
+
 ### Understand the design
 
-Read [ROADMAP.md](ROADMAP.md) for where the project is heading. The template itself (`templates/CLAUDE.md.base`) is the most important file — it defines the conventions that every CEP-managed project follows, including the guidebook voice, the session log structure, and the Mikado tree format.
+Read the [guidebook](.cep/guidebook/README.md) for a chapter-by-chapter walkthrough of how CEP works internally. Start with the [Overview](.cep/guidebook/overview.md) for a 5-minute orientation, then read the [Architecture](.cep/guidebook/architecture.md) chapter for the system design.
 
-When CEP is self-hosted (managed by CEP itself), its own `.cep/guidebook/` will be the definitive reference for how the system works internally. Until then, this README and the template are the primary documentation.
+For the project roadmap, see [ROADMAP.md](ROADMAP.md).
 
 ## Design Philosophy
 

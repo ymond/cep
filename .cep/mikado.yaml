@@ -1,82 +1,105 @@
 project: "cep"
-updated: "2026-02-22"
-active_path: "goal > bootstrap > verify-init"
+updated: "2026-02-23"
+active_path: "goal"
 
 goal:
   title: "CEP v0.2.0 — Self-hosted, tested, and fully documented"
-  status: active
+  status: done
   mhc: 11
+  completed: "2026-02-23"
   children:
     - title: "Complete bootstrap — CEP manages its own development"
-      status: active
+      status: done
       mhc: 10
+      completed: "2026-02-23"
       children:
         - title: "Verify cep init assembles CLAUDE.md correctly for CEP itself"
-          status: active
+          status: done
           mhc: 8
+          completed: "2026-02-23"
         - title: "Commit bootstrap files (CLAUDE.local.md, mikado.yaml, assembled CLAUDE.md)"
-          status: pending
+          status: done
           mhc: 8
+          completed: "2026-02-23"
 
     - title: "Write the CEP guidebook"
-      status: pending
+      status: done
       mhc: 11
+      completed: "2026-02-23"
       children:
         - title: "overview.md — what CEP is, quick start, tech stack, component table"
-          status: pending
+          status: done
           mhc: 10
+          completed: "2026-02-23"
         - title: "architecture.md — template assembly pipeline, CLI structure, upgrade mechanism, data flow"
-          status: pending
+          status: done
           mhc: 11
+          completed: "2026-02-23"
         - title: "cli.md — deep dive on bin/cep, command-by-command walkthrough, bash idioms explained"
-          status: pending
+          status: done
           mhc: 10
+          completed: "2026-02-23"
         - title: "template.md — deep dive on CLAUDE.md.base, the product itself, placeholder system, section-by-section guide"
-          status: pending
+          status: done
           mhc: 10
+          completed: "2026-02-23"
         - title: "project-anatomy.md — bash project structure, directory layout rationale, how PATH discovery works"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-23"
         - title: "vision.md — roadmap, design philosophy, why learning matters, where CEP is going"
-          status: pending
+          status: done
           mhc: 10
+          completed: "2026-02-23"
         - title: "guidebook README.md — table of contents, chapter links, quick reference, ADR index"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-23"
 
     - title: "Add functional tests for the CLI"
-      status: pending
+      status: done
       mhc: 10
+      completed: "2026-02-23"
       children:
         - title: "Write bash test harness — assert_equals, assert_file_contains, assert_file_exists, temp dir setup/teardown"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-23"
         - title: "Test cep init — scaffolds .cep/ structure, assembles CLAUDE.md, creates default files, handles re-init"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-23"
         - title: "Test cep upgrade — updates CLAUDE.md, preserves CLAUDE.local.md, bumps version marker"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-23"
         - title: "Test cep diff — shows changes without applying them, handles up-to-date projects"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-23"
         - title: "Test cep status and cep list — correct output for managed and non-managed paths"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-23"
 
     - title: "Template audit and improvements"
-      status: pending
+      status: done
       mhc: 11
+      completed: "2026-02-23"
       children:
         - title: "Audit stop-too-early behavior — review current instructions, test with a real session, add fixes if needed"
-          status: pending
+          status: done
           mhc: 10
+          completed: "2026-02-23"
         - title: "Review blog post instructions — are they complete and actionable enough for consistent output?"
-          status: pending
+          status: done
           mhc: 10
+          completed: "2026-02-23"
         - title: "Review guidebook maintenance instructions — does the agent know when and how to update each chapter?"
-          status: pending
+          status: done
           mhc: 10
+          completed: "2026-02-23"
         - title: "Bump VERSION if template changed, run cep upgrade on filebrain to propagate"
-          status: pending
+          status: done
           mhc: 8
+          completed: "2026-02-23"
