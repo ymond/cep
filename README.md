@@ -6,205 +6,143 @@ A personal developer platform for working with AI coding agents like [Claude Cod
 
 You start a project with an AI coding agent. It writes code. You come back later and have no idea *why* it made the choices it did, what alternatives it considered, or how the pieces fit together. You can read the code, but the reasoning is gone.
 
-Multiply that across several projects and you're managing a collection of codebases you don't fully understand, built by an agent with no memory of what it learned.
-
 CEP fixes this by giving every project:
 
 - A **CLAUDE.md** that tells the agent how to behave, document, and communicate
 - A **Mikado tree** (YAML) that decomposes goals into tasks with cognitive complexity annotations
 - **Session logs** that capture not just what was done, but why and what was considered
+- **Blog posts** — narrative, educational accounts of each session written for a generalist programmer, annotated with design patterns, conventions, and idioms
+- A **guidebook** — a living reference book about the system, revised every session, written in a warm peer-to-peer voice for someone who's seen everything before but needs explicit reminders
 - **Architecture Decision Records** for significant technical choices
-- A **CLI tool** to manage all of this across every project you work on
+- A **CLI tool** (`cep`) to manage all of this across every project you work on
 
-## Quick Start
+## Install
 
 ```bash
+# Clone the repo
 git clone https://github.com/YOUR_USERNAME/cep.git ~/projects/cep
-cd ~/projects/cep
-chmod +x setup-cep.sh
-./setup-cep.sh
-source ~/.bashrc  # or ~/.zshrc
+
+# Add the CLI to your PATH (add this line to your shell's rc file)
+export PATH="$HOME/projects/cep/bin:$PATH"
+
+# Reload your shell
+source ~/.bashrc  # or ~/.zshrc, ~/.config/fish/config.fish, etc.
+
+# Verify it works
+cep --help
 ```
 
-Scaffold your first project:
+That's it. There's no build step — the CLI is a bash script that reads directly from the repo's `templates/` and `VERSION` files at runtime.
+
+## Usage
+
+### Start a new project
 
 ```bash
 mkdir -p ~/projects/my-project
 cep init ~/projects/my-project my-project
 ```
 
-This creates:
-
-```
-my-project/
-├── CLAUDE.md                      # assembled from CEP template + project context
-└── .cep/
-    ├── version                    # tracks which CEP version this project uses
-    ├── mikado.yaml                # goal decomposition tree
-    ├── CLAUDE.local.md            # project-specific context (preserved on upgrade)
-    ├── logs/                      # session logs (created by the agent)
-    └── decisions/                 # architecture decision records
-```
-
-Edit your project-specific context:
+This scaffolds the `.cep/` directory, assembles a `CLAUDE.md` from the base template, and registers the project. Edit your project-specific context, define your first goal in the Mikado tree, then start your agent:
 
 ```bash
 nano ~/projects/my-project/.cep/CLAUDE.local.md
-```
-
-Then start your agent:
-
-```bash
+nano ~/projects/my-project/.cep/mikado.yaml
 cd ~/projects/my-project
 claude  # or however you launch Claude Code
 ```
 
-The agent reads CLAUDE.md and follows the conventions defined there.
+The agent reads `CLAUDE.md` and follows the conventions defined there — strict TDD, session logging, guidebook maintenance, the whole system.
 
-## CLI Reference
+### Plan a project with the kickoff guide
 
-### `cep init <project-path> <project-name>`
-
-Scaffolds a new CEP-managed project. Creates the `.cep/` directory, assembles CLAUDE.md from the latest template, and registers the project in the CEP registry.
-
-Safe to re-run — it will ask before overwriting and preserves your project-specific content.
-
-### `cep status [project-path]`
-
-Shows CEP version info, session log count, and Mikado tree progress for a project. Defaults to the current directory if no path is given.
-
-### `cep list`
-
-Lists all CEP-managed projects and their version status.
-
-### `cep upgrade <project-path>`
-
-Upgrades a project to the latest CEP version. Regenerates CLAUDE.md from the current template while preserving everything in `.cep/CLAUDE.local.md`. The project-specific content is never touched.
-
-### `cep diff <project-path>`
-
-Shows what would change in CLAUDE.md if you ran `cep upgrade`. Useful for reviewing template changes before applying them.
-
-## Customizing Your Setup
-
-### Per-Project Context
-
-Each project has a `.cep/CLAUDE.local.md` file. This is where you describe what the project is, its tech stack, and any conventions that are specific to this project. This content gets injected into the assembled CLAUDE.md below the `CEP:PROJECT_SPECIFIC_START` marker and is preserved across upgrades.
-
-### Modifying the Base Template
-
-The base template lives at `templates/CLAUDE.md.base`. When you edit it, bump the version in `VERSION`, commit, and then run `cep upgrade` on each project to propagate your changes.
+Before building, you can brainstorm with Claude Desktop (not Claude Code — planning is a conversation, not a coding task). CEP includes a kickoff guide that interviews you, pushes back on scope, and generates the `CLAUDE.local.md` and `mikado.yaml` for you:
 
 ```bash
-# Edit the template
-nano ~/projects/cep/templates/CLAUDE.md.base
-
-# Bump version
-echo "0.2.0" > ~/projects/cep/VERSION
-
-# Commit
-cd ~/projects/cep
-git add -A
-git commit -m "feat: description of what changed"
-
-# Upgrade your projects
-cep upgrade ~/projects/filebrain
-cep upgrade ~/projects/other-project
+# In Claude Desktop, drop in the kickoff guide or tell Claude:
+# "Read ~/projects/cep/templates/PROJECT_KICKOFF.md and follow it"
 ```
 
-### Re-installing After Changes
+After the kickoff, copy the generated files into your project and re-run `cep init` to assemble the final `CLAUDE.md`.
 
-If you pull updates or manually edit files in the CEP repo, there's no separate install step. The CLI reads directly from `~/projects/cep/templates/` and `~/projects/cep/VERSION` at runtime. Just make sure `~/projects/cep/bin` is in your PATH (the setup script handles this).
-
-If you need to re-run setup on a fresh machine:
+### Manage your projects
 
 ```bash
-cd ~/projects/cep
-chmod +x setup-cep.sh
-./setup-cep.sh
-source ~/.bashrc
+cep list                           # List all CEP-managed projects and version status
+cep status ~/projects/my-project   # Session log count, Mikado progress, version info
+cep diff ~/projects/my-project     # Preview what would change on upgrade
+cep upgrade ~/projects/my-project  # Upgrade to latest CEP template (preserves your content)
 ```
 
-## What's in the CLAUDE.md Template
+Run `cep --help` for the full command reference.
 
-The base template defines conventions that apply to every project:
+### What the agent produces
 
-**Session Logs** — After every work session, the agent writes a structured log covering what was accomplished, what decisions were made (with alternatives and reasoning), Mikado tree progress, and explanations of interesting concepts for your review.
+After each session, the agent creates or updates these artifacts in `.cep/`:
 
-**Mikado Tree** — Goals are decomposed in a YAML tree with unlimited nesting depth. Every node is annotated with its level on the [Model of Hierarchical Complexity](https://en.wikipedia.org/wiki/Model_of_hierarchical_complexity) (MHC), which tracks *what kind of thinking* a task demands — not how deep it is in the tree. This builds awareness of when you're over-simplifying a complex decision or over-complicating a concrete one.
+```
+.cep/
+├── logs/YYYYMMDD-HHMM.md       # Session log: what happened, decisions made, open questions
+├── blog/YYYYMMDD-HHMM-title.md # Blog post: narrative teaching document about the session
+├── guidebook/                   # Reference book: living documentation revised every session
+│   ├── README.md                #   Table of contents with chapter links
+│   ├── overview.md              #   "Orient me in 5 minutes"
+│   ├── architecture.md          #   System design, patterns, data flow
+│   ├── [component].md           #   Deep dives per subsystem
+│   ├── project-anatomy.md       #   Language-specific project structure explained
+│   └── vision.md                #   Roadmap and design philosophy
+├── decisions/NNN-title.md       # Architecture Decision Records
+├── mikado.yaml                  # Goal decomposition tree with MHC annotations
+└── sessions.yaml                # Session index with timestamps and commit hashes
+```
 
-**Strict XP Testing** — The template enforces Test-Driven Development as described in Kent Beck's "Test Driven Development: By Example." Red-green-refactor with no exceptions. The agent never writes production code without a failing test first.
+**The guidebook** is the crown jewel. It reads like a book — chapters with prev/next navigation, prose explanations of *why* things work the way they do, design patterns named and explained in context, and the "you've probably seen this before, here's how it works *here*" voice that makes it a genuine learning resource. Every session, the agent revises affected pages so the guidebook always reflects the current state of the system.
 
-**Architecture Decision Records** — Significant technical choices get their own document with context, options considered, the decision, and its consequences.
+**The blog** is a linear teaching journal. Each post explains one session's work as if telling a skilled colleague about it over coffee, annotated with pattern labels like `[pattern: Strategy]`, `[convention]`, `[idiom]`, and `[DDIA concept]`.
 
-**Coding Standards** — Clear, readable code. Atomic commits. Explicit error handling. Justified dependencies.
+**Session logs** are structured records: summary, decisions with alternatives and reasoning, Mikado tree progress, open questions, and a "What I Learned" section that explains interesting concepts at the level of someone who's skilled but encountering this specific thing for the first time.
+
+### Customize the template
+
+The base template lives at `templates/CLAUDE.md.base`. When you edit it:
+
+```bash
+nano ~/projects/cep/templates/CLAUDE.md.base   # Edit the template
+echo "0.3.0" > ~/projects/cep/VERSION          # Bump version
+cd ~/projects/cep && git add -A && git commit -m "feat: description"
+cep upgrade ~/projects/my-project               # Propagate to projects
+```
+
+Per-project customization goes in `.cep/CLAUDE.local.md`, which is never touched by upgrades.
+
+## Contributing
+
+CEP is a personal tool, but its structure is designed to be forkable. If you want to understand how it works internally, adapt it for your own workflow, or contribute back:
+
+### Set up a development environment
+
+```bash
+git clone https://github.com/YOUR_USERNAME/cep.git ~/projects/cep
+cd ~/projects/cep
+```
+
+The CLI is a single bash script at `bin/cep`. The template is at `templates/CLAUDE.md.base`. The project kickoff guide is at `templates/PROJECT_KICKOFF.md`. There's no build system, no dependencies beyond bash and coreutils.
+
+### Understand the design
+
+Read [ROADMAP.md](ROADMAP.md) for where the project is heading. The template itself (`templates/CLAUDE.md.base`) is the most important file — it defines the conventions that every CEP-managed project follows, including the guidebook voice, the session log structure, and the Mikado tree format.
+
+When CEP is self-hosted (managed by CEP itself), its own `.cep/guidebook/` will be the definitive reference for how the system works internally. Until then, this README and the template are the primary documentation.
 
 ## Design Philosophy
 
-**One template, many projects.** Fix a bug in how session logs work, upgrade all your projects with one command.
+**One template, many projects.** Fix a problem in how session logs work, upgrade all your projects with one command.
 
 **Project-specific content is sacred.** Upgrades never touch your `.cep/CLAUDE.local.md` or anything below the `CEP:PROJECT_SPECIFIC_START` marker.
 
-**Human learning is the priority.** The documentation conventions exist so that when you come back to a project after hours or days away, you can understand not just what happened but *why*, at whatever depth you want to explore.
+**Human learning is the priority.** The documentation conventions — blogs, guidebooks, annotated session logs — exist so that when you come back to a project after hours or days, you understand not just what happened but *why*, and you become a better engineer in the process.
 
-**Start simple, rewrite later.** The CLI is bash. It works. When the feature set stabilizes, rewrite it in Go with a proper TUI.
-
-## Starting a New Project
-
-CEP includes a kickoff guide that turns a stream-of-consciousness idea into a fully
-planned project with a `CLAUDE.local.md` and `mikado.yaml`.
-
-### How to Use It
-
-Open a new conversation in **Claude Desktop** (not Claude Code — the kickoff is a
-conversation, not a coding task). Then either:
-
-- Drag and drop `templates/PROJECT_KICKOFF.md` into the chat, or
-- If you have the Filesystem MCP connector enabled, just tell Claude:
-  "Read `~/projects/cep/templates/PROJECT_KICKOFF.md` and follow it"
-
-Then start talking about your idea. Claude will interview you, push back on scope
-creep, help you define a realistic v0.1, and decompose it into a Mikado tree. When
-you're both happy with the plan, it writes the files to `~/Claude/<project-name>/`.
-
-### After the Kickoff
-
-```bash
-mkdir -p ~/projects/<project-name>
-cep init ~/projects/<project-name> <project-name>
-cp ~/Claude/<project-name>/CLAUDE.local.md ~/projects/<project-name>/.cep/CLAUDE.local.md
-cp ~/Claude/<project-name>/mikado.yaml ~/projects/<project-name>/.cep/mikado.yaml
-cep init ~/projects/<project-name> <project-name>  # regenerate CLAUDE.md
-cd ~/projects/<project-name>
-claude --dangerously-skip-permissions
-```
-
-### Why Claude Desktop and Not Claude Code?
-
-The kickoff is an open-ended brainstorming conversation — exploring ideas, getting
-honest pushback, refining scope, making tradeoffs. Claude Desktop is designed for
-that kind of back-and-forth. Claude Code is an execution tool that wants a clear
-task and a codebase. Use Desktop to plan, Code to build.
-
-### Keeping the Kickoff Guide Current
-
-The `PROJECT_KICKOFF.md` template includes a list of your existing projects so Claude
-can spot overlaps and dependencies. Update this list each time you start a new project:
-
-```bash
-nano ~/projects/cep/templates/PROJECT_KICKOFF.md
-# Update the "My existing CEP-managed projects" list
-cd ~/projects/cep
-git add -A
-git commit -m "docs: add <project-name> to kickoff project list"
-```
-
-## Roadmap
-
-- **v0.1.0** — Current. `init`, `status`, `list`, `upgrade`, `diff`.
-- **v0.2.0** — Notification support (Gotify integration for when the agent needs your input).
-- **v0.3.0** — Mikado tree browser (collapsible TUI for exploring the decision tree).
-- **v1.0.0** — Go rewrite with [Charm](https://charm.sh/) libraries.
+**Start simple, rewrite later.** The CLI is bash. It works. When the feature set stabilizes, [rewrite it in Go with Charm](ROADMAP.md).
 
 ## License
 

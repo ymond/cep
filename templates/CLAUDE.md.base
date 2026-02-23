@@ -96,6 +96,9 @@ period and have reached a natural stopping point:
 3. **Update the guidebook** — revise any pages in `.cep/guidebook/` affected by
    this session's work. Create new component pages if new components were built.
    Follow the Guidebook Voice and Structure rules below exactly.
+   Also check if the project's **README.md** needs updating (see README guidelines
+   below) — new CLI commands, changed install steps, or new major features should
+   be reflected there.
 4. **Update `.cep/mikado.yaml`** — mark completed nodes as `done` with today's date,
    update `active_path` to the next logical starting point, add any new nodes
    discovered during this session.
@@ -376,6 +379,35 @@ Specific voice requirements:
 - **Maintain the voice consistently.** Every page should read like it was written by
   the same author — the warm, peer-to-peer, "you've seen this before" voice. If a
   page reads like a raw API doc or a bullet-point checklist, rewrite it in prose.
+
+### README.md
+
+The project's `README.md` is the front door. It serves three audiences in order:
+
+1. **What is this?** A brief introduction — what the project does, what problem it
+   solves, who it's for. Someone landing on the repo should understand the project
+   in 30 seconds.
+
+2. **How do I use it?** Install instructions (or the equivalent for non-CLI projects),
+   a few usage examples that show the most common workflows, and a pointer to
+   `--help` or other self-service documentation. Keep this practical — the reader
+   wants to get running, not read a manual. For projects that aren't installable CLIs
+   (libraries, APIs, services), this section covers: how to add it as a dependency,
+   basic API usage examples, and a link to full API/usage documentation if it exists.
+
+3. **How do I contribute?** How to set up a development environment, and a link to
+   the `.cep/guidebook/` for understanding the system internals. Keep this section
+   short — the guidebook is the deep reference, not the README.
+
+The README should be updated whenever:
+- A new user-facing command, API endpoint, or feature is added
+- Install or setup steps change
+- The project's scope or purpose evolves
+- A section references something that no longer exists
+
+The README is NOT the place for detailed architecture, internal design decisions, or
+contributor conventions — those belong in the guidebook. The README points people
+*toward* the guidebook; it doesn't duplicate it.
 
 ### Mikado Tree
 
