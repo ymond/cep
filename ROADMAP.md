@@ -50,3 +50,5 @@
 - Self-hosting: develop cept using cept
 - Filebrain integration: cept queries filebrain for project context
 - Memory palace integration for learning review
+- `cep publish`: converter that transforms guidebook markdown into other formats (HTML, PDF, epub) — walk the README.md for chapter ordering, run through pandoc or similar
+- Filebrain self-indexing dogfood: filebrain indexes its own `.cep/guidebook/` so you can `filebrain query "how does chunking work?"` and get answers citing the guidebook that describes the system answering the question
