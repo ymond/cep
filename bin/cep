@@ -229,7 +229,8 @@ cmd_upgrade() {
 
     # Extract project name from existing CLAUDE.md
     local project_name
-    project_name="$(head -3 "$project_path/CLAUDE.md" | grep 'Project:' | sed 's/.*Project: //')"
+    # || true prevents grep exit code 1 from triggering set -e via pipefail
+    project_name="$(head -3 "$project_path/CLAUDE.md" | grep 'Project:' | sed 's/.*Project: //' || true)"
     [[ -z "$project_name" ]] && project_name="Unknown"
 
     # Reassemble CLAUDE.md (project-specific content preserved via .cep/CLAUDE.local.md)
@@ -254,7 +255,8 @@ cmd_diff() {
 
     # Generate what the new CLAUDE.md would look like
     local project_name
-    project_name="$(head -3 "$project_path/CLAUDE.md" | grep 'Project:' | sed 's/.*Project: //')"
+    # || true prevents grep exit code 1 from triggering set -e via pipefail
+    project_name="$(head -3 "$project_path/CLAUDE.md" | grep 'Project:' | sed 's/.*Project: //' || true)"
     [[ -z "$project_name" ]] && project_name="Unknown"
 
     local tmp
