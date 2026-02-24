@@ -1,5 +1,5 @@
 # CLAUDE.md
-# CEP v0.2.0 | Project: cep
+# CEP v0.2.1 | Project: cep
 # Last upgraded: 2026-02-23
 
 ## Who I Am
@@ -105,13 +105,35 @@ period and have reached a natural stopping point:
 5. **Update `.cep/sessions.yaml`** — set the current session's status to `ended`,
    fill in `ended` timestamp, populate `decisions` with any ADR filenames created,
    and populate `commits` with commit hashes from this session.
-6. **Commit all work** with appropriate atomic commits.
-7. **Announce completion audibly.** Play a sound so Raymond knows if he's nearby:
+6. **MANDATORY: Verify all session artifacts exist before committing.** Run through
+   this checklist and confirm every item. If any artifact is missing, create it now.
+   Do NOT proceed to committing until every item passes.
+   ```
+   [ ] .cep/logs/YYYYMMDD-HHMM.md exists and has all sections
+       (Summary, Decisions Made, Mikado Tree Progress, What I Learned, Open Questions, Possibilities)
+   [ ] .cep/blog/YYYYMMDD-HHMM-short-title.md exists and is a narrative teaching
+       document (not a reformatted log — if it reads like the log, rewrite it)
+   [ ] .cep/guidebook/ has been reviewed — any pages affected by this session's work
+       are updated, new component pages created if new components were built
+   [ ] .cep/guidebook/README.md table of contents is current (all chapters listed)
+   [ ] .cep/mikado.yaml is updated — completed nodes marked done with dates,
+       active_path points to next logical starting point
+   [ ] .cep/sessions.yaml is updated — status set to ended, ended timestamp filled,
+       decisions and commits lists populated
+   [ ] README.md reviewed — updated if new commands, features, or setup steps were added
+   [ ] Any significant technical decisions have ADRs in .cep/decisions/
+   ```
+   **This checklist is not optional. Raymond relies on these artifacts for learning
+   and project continuity. A session without a blog post or with a stale guidebook
+   is an incomplete session, even if all the code works.**
+
+7. **Commit all work** with appropriate atomic commits.
+8. **Announce completion audibly.** Play a sound so Raymond knows if he's nearby:
 ```bash
    espeak "Claude has finished working. The computer will sleep in 3 minutes. To cancel, run: kill all sleep." 2>/dev/null \
      || printf '\a'
 ```
-8. **Put the computer to sleep.** Raymond is likely asleep or away. Do NOT prompt.
+9. **Put the computer to sleep.** Raymond is likely asleep or away. Do NOT prompt.
    Wait 3 minutes (so Raymond can cancel if nearby), then sleep:
 ```bash
    sleep 180 && systemctl suspend &
@@ -119,7 +141,7 @@ period and have reached a natural stopping point:
 ```
 
 **CRITICAL: Do not ask "should I sleep the computer?" or "would you like to continue?" —
-Raymond is not there. Steps 1-8 are all autonomous. No prompting. No waiting.**
+Raymond is not there. Steps 1-9 are all autonomous. No prompting. No waiting.**
 
 ## Documentation Requirements
 
