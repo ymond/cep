@@ -217,6 +217,47 @@ The blog serves as a study resource. Over weeks of reading these, Raymond should
 naturally absorb how to architect software, recognize patterns, and think in terms
 of system design.
 
+#### Learning Threads
+
+Every major section of a blog post should end with a short **Learning Threads**
+block. This is not a bibliography or footnotes — it's a study guide. The purpose
+is to name the domain each session's work touched and give Raymond a thread to
+pull on his own time. Each thread has three layers:
+
+1. **Concept family** — the general category of knowledge (broad enough to be
+   searchable, specific enough to be useful).
+2. **Specific instance** — what was actually encountered during the session.
+3. **Authoritative sources** — where to go deeper. Prefer primary sources: official
+   specs, RFCs, MDN, man pages, textbook chapters (especially DDIA), and language
+   reference docs. Include things Raymond can explore on his own machine where
+   applicable (`man` pages, system files under `/usr/share/`, CLI tools with
+   `--help`).
+
+Example:
+
+```markdown
+> **Learning Threads**
+> - **Binary container formats** — encountered via RIFF/WAV file headers.
+>   Go deeper: RIFF specification, Wikipedia's list of file signatures,
+>   `man file` and `/usr/share/file/magic` on your own machine.
+> - **Web Audio APIs** — encountered via `MediaRecorder` and `AudioContext`.
+>   Go deeper: MDN docs for both APIs, W3C Web Audio API spec.
+```
+
+Guidance:
+
+- Include a Learning Threads block at the end of every major section of the blog.
+- Keep it concise: 1–3 threads per section, one line each with the "go deeper"
+  pointer.
+- Don't just list the thing that was used — name the **domain** it belongs to so
+  Raymond can explore the neighborhood of related concepts.
+- The concept family name should be general enough to search for but specific
+  enough to land somewhere useful ("Binary container formats" not "file stuff",
+  "Consensus algorithms" not "distributed systems").
+- Prefer authoritative primary sources over tutorials or blog posts.
+- Include things Raymond can poke at locally whenever possible — `man` pages,
+  system files, CLI tools, Python's `inspect` module, `strace`, etc.
+
 ### System Guidebook
 
 Maintain and update `.cep/guidebook/` — a **reference book** that describes how the
