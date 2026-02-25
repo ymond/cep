@@ -14,6 +14,7 @@ If you've worked on projects in compiled languages (Go, Rust, Java), you're used
 │   └── cep                      # The CLI — the entire runtime
 ├── templates/
 │   ├── CLAUDE.md.base           # The base template (the product)
+│   ├── mikado-spec.md           # Mikado tree spec (copied into projects as-is)
 │   └── PROJECT_KICKOFF.md       # Interactive planning guide for new projects
 ├── hooks/                       # (empty) Future: lifecycle hooks for cep commands
 ├── lib/                         # (empty) Future: shared bash functions extracted from bin/cep
@@ -22,6 +23,7 @@ If you've worked on projects in compiled languages (Go, Rust, Java), you're used
 ├── .cep/                        # CEP managing itself (dogfooding)
 │   ├── CLAUDE.local.md          # Project-specific context for CEP
 │   ├── mikado.yaml              # Current goal decomposition
+│   ├── mikado-spec.md           # Mikado tree format spec (CLI-managed)
 │   ├── sessions.yaml            # Session index
 │   ├── version                  # Which CEP version this project runs
 │   ├── logs/                    # Session logs
@@ -39,7 +41,7 @@ If you've worked on projects in compiled languages (Go, Rust, Java), you're used
 
 The `bin/` directory follows a Unix convention: executable scripts go in `bin/`. When you add `~/projects/cep/bin` to your `PATH`, the shell can find `cep` without you specifying the full path. This is the same convention used by system tools (`/usr/bin/`), local tools (`/usr/local/bin/`), and per-user tools (`~/.local/bin/`). The convention exists because the `PATH` environment variable is a colon-separated list of directories the shell searches when you type a command name.
 
-The `templates/` directory separates the template files from the runtime. The CLI reads from this directory at runtime — there's no "build" step that copies templates into the binary. This means you can edit a template and immediately see the effect with `cep diff`. If the templates were embedded in the script (heredocs, for instance), editing them would mean editing the CLI itself, which is riskier and harder to review.
+The `templates/` directory separates the template files from the runtime. The CLI reads from this directory at runtime — there's no "build" step that copies templates into the binary. This means you can edit a template and immediately see the effect with `cep diff`. If the templates were embedded in the script (heredocs, for instance), editing them would mean editing the CLI itself, which is riskier and harder to review. Not all templates go through the same delivery mechanism, though. `CLAUDE.md.base` is *assembled* — placeholder substitution, multiline injection — into the project's `CLAUDE.md`. `mikado-spec.md` is simply *copied* as-is into `.cep/mikado-spec.md`, because it's a self-contained reference document with no project-specific content to inject.
 
 The `hooks/` and `lib/` directories are empty placeholders. They exist in the repository to signal planned architecture: `hooks/` for lifecycle hooks that run before/after commands (think git hooks but for cep), and `lib/` for bash functions extracted from `bin/cep` when the script grows too large. The directories are committed even though they're empty because git doesn't track empty directories — the directories contain a `.gitkeep` or are mentioned in documentation to establish the convention.
 
@@ -53,8 +55,11 @@ Inside `.cep/`, the files break into two categories:
 
 **CLI-managed files** are created or updated by the `cep` CLI:
 - `version` — stamped by `cep init` and `cep upgrade`
+- `mikado-spec.md` — copied from `templates/mikado-spec.md` by `cep init` and `cep upgrade`, unconditionally overwritten every time
 - `CLAUDE.local.md` — created with starter content by `cep init` if it doesn't exist, never overwritten
 - `mikado.yaml` — created with starter content by `cep init` if it doesn't exist, never overwritten
+
+The `mikado-spec.md` file deserves a note about *why* it's a separate file rather than inlined in CLAUDE.md. The Mikado tree specification — the YAML format, node status values, MHC levels, traversal algorithm — is substantial, roughly 150 lines. CLAUDE.md references the Mikado tree and includes the behavioral rules (when to update the tree, what to do at startup and shutdown), but the full structural specification lives in this standalone file. This separation is a context window optimization: when the agent needs to create, edit, or traverse a `mikado.yaml` file (say, during a planning session on claude.ai), it can read `.cep/mikado-spec.md` directly without loading the entire CLAUDE.md. Since the spec is CEP-owned — not user-edited — the CLI overwrites it on every `init` and `upgrade`, keeping managed projects current as the spec evolves across CEP versions.
 
 **Agent-managed files** are created and updated by the AI agent during sessions:
 - `sessions.yaml` — session index, appended to each session

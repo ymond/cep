@@ -106,6 +106,13 @@ test_init_deduplicates_registry() {
     assert_equals "1" "$count" "Registry should not contain duplicate entries"
 }
 
+test_init_copies_mikado_spec() {
+    "$CEP_BIN" init "$_TEST_TMPDIR" "testproj" >/dev/null 2>&1
+    assert_file_exists "$_TEST_TMPDIR/.cep/mikado-spec.md"
+    diff -q "$CEP_DIR/templates/mikado-spec.md" "$_TEST_TMPDIR/.cep/mikado-spec.md" >/dev/null 2>&1 \
+        || { _fail "mikado-spec.md should match the source template"; return 1; }
+}
+
 test_init_no_leftover_assembled_file() {
     "$CEP_BIN" init "$_TEST_TMPDIR" "testproj" >/dev/null 2>&1
     if [[ -f "$_TEST_TMPDIR/.cep/CLAUDE.md.assembled" ]]; then
@@ -125,6 +132,7 @@ run_tests \
     test_init_injects_local_content \
     test_init_preserves_existing_local_on_reinit \
     test_init_preserves_existing_mikado_on_reinit \
+    test_init_copies_mikado_spec \
     test_init_registers_project \
     test_init_deduplicates_registry \
     test_init_no_leftover_assembled_file

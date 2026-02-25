@@ -77,6 +77,17 @@ test_upgrade_creates_new_directories() {
     assert_dir_exists "$_TEST_TMPDIR/.cep/guidebook"
 }
 
+test_upgrade_copies_mikado_spec() {
+    _init_at_version "$_TEST_TMPDIR" "testproj" "0.1.0"
+    # Remove mikado-spec to simulate an older install that didn't have it
+    rm -f "$_TEST_TMPDIR/.cep/mikado-spec.md"
+
+    "$CEP_BIN" upgrade "$_TEST_TMPDIR" >/dev/null 2>&1
+    assert_file_exists "$_TEST_TMPDIR/.cep/mikado-spec.md"
+    diff -q "$CEP_DIR/templates/mikado-spec.md" "$_TEST_TMPDIR/.cep/mikado-spec.md" >/dev/null 2>&1 \
+        || { _fail "mikado-spec.md should match the source template after upgrade"; return 1; }
+}
+
 test_upgrade_on_non_cep_project_fails() {
     local non_cep_dir
     non_cep_dir="$(mktemp -d)"
@@ -92,4 +103,5 @@ run_tests \
     test_upgrade_preserves_local_content \
     test_upgrade_exits_when_current \
     test_upgrade_creates_new_directories \
+    test_upgrade_copies_mikado_spec \
     test_upgrade_on_non_cep_project_fails

@@ -46,6 +46,9 @@ cmd_init() {
     mkdir -p "$project_path/.cep/blog"
     mkdir -p "$project_path/.cep/guidebook"
 
+    # Copy mikado spec (CEP-owned, unconditional overwrite)
+    cp "$CEP_DIR/templates/mikado-spec.md" "$project_path/.cep/mikado-spec.md"
+
     # Write version marker
     echo "$CEP_VERSION" > "$project_path/.cep/version"
 
@@ -235,6 +238,9 @@ cmd_upgrade() {
 
     # Reassemble CLAUDE.md (project-specific content preserved via .cep/CLAUDE.local.md)
     assemble_claude_md "$project_path" "$project_name"
+
+    # Copy mikado spec (CEP-owned, unconditional overwrite)
+    cp "$CEP_DIR/templates/mikado-spec.md" "$project_path/.cep/mikado-spec.md"
 
     # Update version
     echo "$CEP_VERSION" > "$project_path/.cep/version"

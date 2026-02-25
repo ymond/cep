@@ -66,7 +66,13 @@ The longest section of the template. It defines the format and voice for four do
 
 ### The Mikado Tree
 
-The template defines the YAML format for goal decomposition and the MHC (Model of Hierarchical Complexity) annotation system. MHC levels range from 8 (concrete operational — "run this command") to 13 (paradigmatic — "create new frameworks"). The purpose is to make visible what kind of thinking each task demands, so the agent brings the right cognitive frame.
+The template's Mikado section works as a two-level system. CLAUDE.md contains the *behavioral* rules — when to read the tree (startup), when to update it (after completing nodes, at shutdown), and how the tree integrates with session logs and blog posts. But the full *structural* specification — the YAML format, node status values, MHC level definitions, and the traversal algorithm — lives in a separate file: `templates/mikado-spec.md`, which the CLI copies into each managed project as `.cep/mikado-spec.md`.
+
+The rationale is context window efficiency. The Mikado specification is roughly 150 lines of detailed reference material (the exact YAML schema, all five status values with their semantics, MHC levels 8 through 13 with examples, a seven-step traversal algorithm). An agent working on a planning session — decomposing goals, adding nodes, updating statuses — needs that reference, but it doesn't need the rest of CLAUDE.md's documentation conventions, coding standards, and shutdown procedures. By keeping the spec as a standalone file, the agent can `read .cep/mikado-spec.md` and get exactly the information it needs without burning context on unrelated instructions.
+
+The spec evolves with CEP versions (new status values, revised traversal rules), so the CLI overwrites `.cep/mikado-spec.md` on every `cep init` and `cep upgrade` — same lifecycle as the assembled CLAUDE.md, but a straight copy rather than a template assembly.
+
+The MHC annotation system is worth highlighting specifically. MHC levels range from 8 (concrete operational — "run this command") to 13 (paradigmatic — "create new frameworks"). The purpose is to make visible what kind of thinking each task demands, so the agent brings the right cognitive frame.
 
 ### Coding Standards and Testing
 
